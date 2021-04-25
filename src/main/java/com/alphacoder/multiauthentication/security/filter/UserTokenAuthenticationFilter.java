@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -15,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @RequiredArgsConstructor(onConstructor = @__ ({@Autowired}))
-public class UserTokenFilter extends OncePerRequestFilter {
+public class UserTokenAuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationManager manager;
 
     @Override
@@ -26,12 +27,16 @@ public class UserTokenFilter extends OncePerRequestFilter {
 
         Authentication authentication= new UserTokenAuthentication(username, token);
 
+        try{
         authentication= manager.authenticate(authentication);
 
         if(authentication.isAuthenticated()){
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);
         }else{
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        }
+    }catch(AuthenticationException exception){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }

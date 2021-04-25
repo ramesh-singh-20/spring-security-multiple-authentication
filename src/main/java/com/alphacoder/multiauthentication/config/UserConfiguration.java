@@ -1,18 +1,20 @@
 package com.alphacoder.multiauthentication.config;
 
 import com.alphacoder.multiauthentication.security.filter.UserAuthenticationFilter;
-import com.alphacoder.multiauthentication.security.filter.UserTokenFilter;
+import com.alphacoder.multiauthentication.security.filter.UserTokenAuthenticationFilter;
 import com.alphacoder.multiauthentication.security.provider.UserTokenAuthenticationProvider;
 import com.alphacoder.multiauthentication.security.provider.UsernameOtpAuthenticationProvider;
 import com.alphacoder.multiauthentication.security.provider.UsernamePasswordAuthenticationProvider;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -34,8 +36,8 @@ public class UserConfiguration extends WebSecurityConfigurerAdapter {
     };
 
     @Bean
-    public UserTokenFilter userTokenFilter() throws Exception {
-        return new UserTokenFilter(this.authenticationManagerBean());
+    public UserTokenAuthenticationFilter userTokenFilter() throws Exception {
+        return new UserTokenAuthenticationFilter(this.authenticationManagerBean());
     }
 
     @Override
@@ -60,6 +62,14 @@ public class UserConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
+    }
+
+    @Bean
+    public InitializingBean initializingBean(){
+        return () -> {
+            SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+
+        };
     }
 
 
