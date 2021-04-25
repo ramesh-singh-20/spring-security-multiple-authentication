@@ -8,11 +8,8 @@ import javax.persistence.*;
 @Table(name= "USER_OTP")
 @Data
 public class UserOtpEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name= "ID")
-    private Integer id;
 
+    @Id
     @Column(name= "USERNAME")
     private String username;
 

@@ -17,7 +17,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var userOptional= this.userRepository.findUserByUsername(username);
+        var userOptional= this.userRepository.findById(username);
         var userEntity= userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found."));
         return new SecurityUser(userEntity);
     }

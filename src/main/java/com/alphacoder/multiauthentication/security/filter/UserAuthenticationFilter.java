@@ -1,9 +1,12 @@
 package com.alphacoder.multiauthentication.security.filter;
 
 import com.alphacoder.multiauthentication.entity.UserOtpEntity;
+import com.alphacoder.multiauthentication.entity.UserTokenEntity;
 import com.alphacoder.multiauthentication.repository.OtpRepository;
+import com.alphacoder.multiauthentication.repository.TokenRepository;
 import com.alphacoder.multiauthentication.security.authentication.UsernameOtpAuthentication;
 import com.alphacoder.multiauthentication.security.authentication.UsernamePasswordAuthentication;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -20,7 +23,7 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.UUID;
 
-@Component
+@RequiredArgsConstructor(onConstructor = @__ ({@Autowired}))
 public class UserAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -28,6 +31,9 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private OtpRepository otpRepository;
+
+    @Autowired
+    private TokenRepository tokenRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -51,7 +57,13 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
                 Authentication authentication = new UsernameOtpAuthentication(username, otp);
                 authentication = manager.authenticate(authentication);
                 if (authentication.isAuthenticated()) {
-                    response.setHeader("Authorization", UUID.randomUUID().toString());
+                    String token= UUID.randomUUID().toString();
+                    response.setHeader("Authorization", token);
+
+                    UserTokenEntity tokenEntity= new UserTokenEntity();
+                    tokenEntity.setUsername(username);
+                    tokenEntity.setToken(token);
+                    tokenRepository.save(tokenEntity);
                 }
             }
         }catch(AuthenticationException exception){

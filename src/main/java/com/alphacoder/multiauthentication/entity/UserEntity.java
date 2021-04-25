@@ -9,10 +9,6 @@ import javax.persistence.*;
 @Data
 public class UserEntity {
     @Id
-    @Column(name= "ID")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
     @Column(name= "USERNAME")
     private String username;
 
